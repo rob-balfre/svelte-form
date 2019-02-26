@@ -12,6 +12,7 @@ export const createForm = (state, {
     let emptyFn = () => { };
 
     let { forms } = state.store.get();
+
     forms = forms || {};
 
     forms[name] = {
@@ -20,6 +21,7 @@ export const createForm = (state, {
         data: data || {},
         isValid,
         isDirty: isDirty === undefined ? false : isDirty,
+        hasSubmitted: false,
         onChange: onChange || emptyFn,
         handleReset: handleReset || emptyFn,
         handleSubmit: handleSubmit || emptyFn

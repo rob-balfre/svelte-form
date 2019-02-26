@@ -48,6 +48,11 @@
 		node.removeEventListener(event, handler, options);
 	}
 
+	function setAttribute(node, attribute, value) {
+		if (value == null) node.removeAttribute(attribute);
+		else node.setAttribute(attribute, value);
+	}
+
 	function setData(text, data) {
 		text.data = '' + data;
 	}
@@ -203,6 +208,7 @@
 	    let emptyFn = () => { };
 
 	    let { forms } = state.store.get();
+
 	    forms = forms || {};
 
 	    forms[name] = {
@@ -211,6 +217,7 @@
 	        data: data || {},
 	        isValid,
 	        isDirty: isDirty === undefined ? false : isDirty,
+	        hasSubmitted: false,
 	        onChange: onChange || emptyFn,
 	        handleReset: handleReset || emptyFn,
 	        handleSubmit: handleSubmit || emptyFn
@@ -226,6 +233,7 @@
 	function data() {
 	    return {
 	        show: false,
+	        type: 'text',
 	        belongsTo: undefined,
 	        name: undefined,
 	        value: undefined,
@@ -243,7 +251,12 @@
 	    let { forms } = this.store.get();
 	    if (!forms) {
 	        forms = createForm(this, {
-	            name: belongsTo
+	            name: belongsTo,
+	            handleSubmit: (event) => {
+	                console.log('event :', event);
+	                event.preventDefault();
+
+	            }
 	        });
 	    }
 
@@ -271,21 +284,48 @@
 	    });
 	}
 	function onstate({ changed, current, previous }) {
-	    if (previous && !current.isDirty && changed.value) {
-	        console.log('wow');
-	        const { forms } = this.store.get();
-	        const form = forms[current.belongsTo];
-	        const element = form.formElements[current.name];
+	    if (!previous) return;
+
+	    const { forms } = this.store.get();
+	    const form = forms[current.belongsTo];
+	    const element = form.formElements[current.name];
+
+	    if (!current.isDirty && changed.value) {
 	        element.isDirty = true;
-	        this.set({ isDirty: true});
-	        this.store.set({
-	            forms
-	        });
+	        this.set({ isDirty: true });
+
 	    }
 
-	    console.log('this.store.get().forms :', this.store.get().forms);
-	    
+	    if (changed.value) {
+	        const input = this.refs.input;
+	        element.isValid = input.checkValidity();
+
+	        const checkIsValid = () => {
+	            let isValid = true;
+	            Object.values(form.formElements).forEach(element => {
+	                if (isValid) {
+	                    isValid = element.isValid || false;
+	                }
+	            });
+	            return isValid;
+	        };
+
+	        form.isValid = checkIsValid();
+	    }
+
+	    console.log('forms :', forms);
+
+	    this.store.set({
+	        forms
+	    });
 	}
+	function add_css() {
+		var style = createElement("style");
+		style.id = 'svelte-z44360-style';
+		style.textContent = "input.svelte-z44360:valid{border:2px solid green}input.svelte-z44360:invalid{border:2px solid red}";
+		append(document.head, style);
+	}
+
 	function create_main_fragment(component, ctx) {
 		var if_block_anchor;
 
@@ -328,7 +368,77 @@
 
 	// (1:0) {#if show}
 	function create_if_block(component, ctx) {
-		var input, input_updating = false, text0, p, text1, text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty, text2;
+		var text0, div, small0, text1, text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty, text2, text3, br, text4, small1, text5, text6_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isValid, text6;
+
+		var if_block = (ctx.type === 'text') && create_if_block_1(component, ctx);
+
+		return {
+			c() {
+				if (if_block) if_block.c();
+				text0 = createText("\n\n");
+				div = createElement("div");
+				small0 = createElement("small");
+				text1 = createText("isDirty: ");
+				text2 = createText(text2_value);
+				text3 = createText(" ");
+				br = createElement("br");
+				text4 = createText("\n    ");
+				small1 = createElement("small");
+				text5 = createText("isValid: ");
+				text6 = createText(text6_value);
+			},
+
+			m(target, anchor) {
+				if (if_block) if_block.m(target, anchor);
+				insert(target, text0, anchor);
+				insert(target, div, anchor);
+				append(div, small0);
+				append(small0, text1);
+				append(small0, text2);
+				append(div, text3);
+				append(div, br);
+				append(div, text4);
+				append(div, small1);
+				append(small1, text5);
+				append(small1, text6);
+			},
+
+			p(changed, ctx) {
+				if (ctx.type === 'text') {
+					if (if_block) {
+						if_block.p(changed, ctx);
+					} else {
+						if_block = create_if_block_1(component, ctx);
+						if_block.c();
+						if_block.m(text0.parentNode, text0);
+					}
+				} else if (if_block) {
+					if_block.d(1);
+					if_block = null;
+				}
+
+				if ((changed.$forms || changed.belongsTo || changed.name) && text2_value !== (text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty)) {
+					setData(text2, text2_value);
+				}
+
+				if ((changed.$forms || changed.belongsTo || changed.name) && text6_value !== (text6_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isValid)) {
+					setData(text6, text6_value);
+				}
+			},
+
+			d(detach) {
+				if (if_block) if_block.d(detach);
+				if (detach) {
+					detachNode(text0);
+					detachNode(div);
+				}
+			}
+		};
+	}
+
+	// (3:0) {#if type === 'text'}
+	function create_if_block_1(component, ctx) {
+		var input, input_updating = false, input_pattern_value, input_minlength_value, input_maxlength_value;
 
 		function input_input_handler() {
 			input_updating = true;
@@ -339,28 +449,31 @@
 		return {
 			c() {
 				input = createElement("input");
-				text0 = createText("\n");
-				p = createElement("p");
-				text1 = createText("isDirty: ");
-				text2 = createText(text2_value);
 				addListener(input, "input", input_input_handler);
+				input.className = "" + ctx.classes + " svelte-z44360";
 				input.id = ctx.name;
 				input.required = ctx.isRequired;
+				input.pattern = input_pattern_value = ctx.pattern || '*';
+				setAttribute(input, "minlength", input_minlength_value = ctx.minlength || 0);
+				input.maxLength = input_maxlength_value = ctx.maxlength || 9999;
+				input.name = ctx.name;
 			},
 
 			m(target, anchor) {
 				insert(target, input, anchor);
+				component.refs.input = input;
 
-				input.value = ctx.value ;
-
-				insert(target, text0, anchor);
-				insert(target, p, anchor);
-				append(p, text1);
-				append(p, text2);
+				input.value = ctx.value
+	    ;
 			},
 
 			p(changed, ctx) {
-				if (!input_updating && changed.value) input.value = ctx.value ;
+				if (!input_updating && changed.value) input.value = ctx.value
+	    ;
+				if (changed.classes) {
+					input.className = "" + ctx.classes + " svelte-z44360";
+				}
+
 				if (changed.name) {
 					input.id = ctx.name;
 				}
@@ -369,8 +482,20 @@
 					input.required = ctx.isRequired;
 				}
 
-				if ((changed.$forms || changed.belongsTo || changed.name) && text2_value !== (text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty)) {
-					setData(text2, text2_value);
+				if ((changed.pattern) && input_pattern_value !== (input_pattern_value = ctx.pattern || '*')) {
+					input.pattern = input_pattern_value;
+				}
+
+				if ((changed.minlength) && input_minlength_value !== (input_minlength_value = ctx.minlength || 0)) {
+					setAttribute(input, "minlength", input_minlength_value);
+				}
+
+				if ((changed.maxlength) && input_maxlength_value !== (input_maxlength_value = ctx.maxlength || 9999)) {
+					input.maxLength = input_maxlength_value;
+				}
+
+				if (changed.name) {
+					input.name = ctx.name;
 				}
 			},
 
@@ -380,16 +505,14 @@
 				}
 
 				removeListener(input, "input", input_input_handler);
-				if (detach) {
-					detachNode(text0);
-					detachNode(p);
-				}
+				if (component.refs.input === input) component.refs.input = null;
 			}
 		};
 	}
 
 	function FormElement(options) {
 		init(this, options);
+		this.refs = {};
 		this._state = assign(assign(this.store._init(["forms"]), data()), options.data);
 		this.store._add(this, ["forms"]);
 		this._intro = true;
@@ -397,6 +520,8 @@
 		this._handlers.state = [onstate];
 
 		this._handlers.destroy = [removeFromStore];
+
+		if (!document.getElementById("svelte-z44360-style")) add_css();
 
 		onstate.call(this, { changed: assignTrue({}, this._state), current: this._state });
 

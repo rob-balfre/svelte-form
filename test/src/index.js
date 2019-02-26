@@ -91,7 +91,7 @@ test('when a FormElement is present on page then a forms object is created on th
 
   store.set({
     form1Data: {
-      hello: 'hi',
+      name: '',
       world: ''
     }
   })
