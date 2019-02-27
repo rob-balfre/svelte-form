@@ -85,7 +85,30 @@ assert.htmlEqual = (a, b, msg) => {
 };
 
 // tests
-test('when a FormElement is present on page then a forms object is created on the store', async (t) => {
+test('when a FormElement is present on page then a "forms" object is created on the store', async (t) => {
+  const div = document.createElement('div');
+  document.body.appendChild(div);
+
+  store.set({
+    form1Data: {
+      name: '',
+      world: ''
+    }
+  })
+
+  const form = new Form1({
+    target,
+    store,
+    data: {}
+  });
+
+  t.ok(store.get().forms)
+  
+  form.destroy();
+});
+
+
+test('when a Form has FormElements and form is interacted with then form.isDirty becomes true', async (t) => {
   const div = document.createElement('div');
   document.body.appendChild(div);
 
@@ -107,9 +130,12 @@ test('when a FormElement is present on page then a forms object is created on th
   // form.destroy();
 });
 
+// TODO: Tests...
+// Form isDirty
+// Form isValid
+// FormElement isDirty
+// FormElement isValid
 
-// FormElement create data on store
-// 
 
 
 function focus(element, setFocus) {

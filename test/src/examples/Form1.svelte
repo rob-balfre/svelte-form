@@ -24,6 +24,7 @@
 {#if $forms}
 <h2>Form state:</h2>
 <p>Form isValid: {$forms.form1.isValid}</p>
+<p>Form isDirty: {$forms.form1.isDirty}</p>
 <p>Form hasSubmitted: {$forms.form1.hasSubmitted}</p>
 {/if}
 

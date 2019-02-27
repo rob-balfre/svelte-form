@@ -2,8 +2,6 @@ export const createForm = (state, {
     name,
     formElements,
     data,
-    isValid,
-    isDirty,
     onChange,
     handleReset,
     handleSubmit
@@ -19,8 +17,7 @@ export const createForm = (state, {
         name,
         formElements: formElements || {},
         data: data || {},
-        isValid,
-        isDirty: isDirty === undefined ? false : isDirty,
+        isDirty: false,
         hasSubmitted: false,
         onChange: onChange || emptyFn,
         handleReset: handleReset || emptyFn,
@@ -30,4 +27,14 @@ export const createForm = (state, {
     state.store.set({ forms });
 
     return state.store.get().forms
+}
+
+export const checkFormIsValid = (form) => {
+    let isValid = true;
+    Object.values(form.formElements).forEach(element => {
+        if (isValid) {
+            isValid = element.isValid || false;
+        }
+    })
+    return isValid;
 }

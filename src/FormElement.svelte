@@ -32,7 +32,7 @@
 </style>
 
 <script>
-    import { createForm } from './formService';
+    import { createForm, checkFormIsValid } from './formService';
 
     export default {
         data() {
@@ -59,28 +59,18 @@
             const { forms } = this.store.get();
             const form = forms[current.belongsTo];
             const element = form.formElements[current.name];
+            
+            form.isDirty = true;
 
             if (!current.isDirty && changed.value) {
                 element.isDirty = true;
                 this.set({ isDirty: true });
-
             }
 
             if (changed.value) {
                 const input = this.refs.input;
                 element.isValid = input.checkValidity();
-
-                const checkIsValid = () => {
-                    let isValid = true;
-                    Object.values(form.formElements).forEach(element => {
-                        if (isValid) {
-                            isValid = element.isValid || false;
-                        }
-                    })
-                    return isValid;
-                }
-
-                form.isValid = checkIsValid();
+                form.isValid = checkFormIsValid(form);
             }
 
             console.log('forms :', forms);
@@ -118,6 +108,8 @@
                 handleClear,
                 handleValidation
             }
+
+            form.isValid = checkFormIsValid(form);
 
             this.store.set({
                 forms
