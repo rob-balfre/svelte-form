@@ -16,7 +16,7 @@
 
 <div>
     <small>isDirty: { $forms[belongsTo].formElements[name].isDirty }</small> <br />
-    <small>isValid: {  $forms[belongsTo].formElements[name].isValid }</small>
+    <small>isValid: { isValid }</small>
 </div>
 
 {/if}
@@ -43,37 +43,54 @@
                 name: undefined,
                 value: undefined,
                 isRequired: false,
-                isValid: undefined,
+                // isValid: undefined,
                 isDirty: false,
                 onChange: () => { },
                 handleClear: () => { },
-                handleValidation: () => { }
+                handleValidation: () => { },
+                ref: undefined
             }
         },
         computed: {
-            // show : ({ value }) => time.getHours(),
+            isValid : ({ value, ref }) => {
+                if (!value || !ref) return false;
+                console.log('COMP');
+                return ref.checkValidity()
+            },
         },
         onstate({ changed, current, previous }) {
-            if (!previous) return;
-
             const { forms } = this.store.get();
+            // console.log('ONE');
+            if (!forms) return;
+
             const form = forms[current.belongsTo];
+            // console.log('TWO');
+            if (!form) return;
+
             const element = form.formElements[current.name];
-            
-            form.isDirty = true;
+            // console.log('THREE');
+            if (!element) return;
+
+            const input = this.refs.input;
+            // console.log('FOUR');
+            if (!input) return;
+            this.set({ref: input})
 
             if (!current.isDirty && changed.value) {
+                form.isDirty = true;
                 element.isDirty = true;
                 this.set({ isDirty: true });
             }
 
-            if (changed.value) {
-                const input = this.refs.input;
-                element.isValid = input.checkValidity();
-                form.isValid = checkFormIsValid(form);
-            }
+            // if (changed.value) {
+                console.log('FIVE');
+                const {isValid} = this.get();
+                element.isValid = isValid;
 
-            console.log('forms :', forms);
+                console.log('element.isValid :', element.isValid);
+
+                form.isValid = checkFormIsValid(form);
+            // }
 
             this.store.set({
                 forms
@@ -87,15 +104,16 @@
                 forms = createForm(this, {
                     name: belongsTo,
                     handleSubmit: (event) => {
-                        console.log('event :', event);
                         event.preventDefault();
-
                     }
                 })
             }
 
             const form = forms[belongsTo];
             if (!form) return console.warn('No form with that name is registered with this store.')
+
+
+            console.log('isValid :', isValid);
 
             form.formElements[name] = {
                 belongsTo,
@@ -108,6 +126,9 @@
                 handleClear,
                 handleValidation
             }
+
+            
+            // element.isValid = isValid;
 
             form.isValid = checkFormIsValid(form);
 

@@ -1,16 +1,12 @@
 import svelte from 'svelte';
-import {Store} from 'svelte/store.js';
+import { Store } from 'svelte/store.js';
 import FormElement from '../../src/FormElement.svelte';
 import Form1 from './examples/Form1.svelte';
 
-import {createForm} from '../../src/formService';
+import { createForm } from '../../src/formService';
 
 
-import {assert, test, done} from 'tape-modern';
-
-
-const store = new Store({
-});
+import { assert, test, done } from 'tape-modern';
 
 
 // setup
@@ -89,6 +85,8 @@ test('when a FormElement is present on page then a "forms" object is created on 
   const div = document.createElement('div');
   document.body.appendChild(div);
 
+  const store = new Store({});
+
   store.set({
     form1Data: {
       name: '',
@@ -99,11 +97,10 @@ test('when a FormElement is present on page then a "forms" object is created on 
   const form = new Form1({
     target,
     store,
-    data: {}
   });
 
   t.ok(store.get().forms)
-  
+
   form.destroy();
 });
 
@@ -112,6 +109,8 @@ test('when a Form has FormElements and form is interacted with then form.isDirty
   const div = document.createElement('div');
   document.body.appendChild(div);
 
+  const store = new Store({});
+
   store.set({
     form1Data: {
       name: '',
@@ -122,11 +121,42 @@ test('when a Form has FormElements and form is interacted with then form.isDirty
   const form = new Form1({
     target,
     store,
-    data: {}
   });
 
-  t.ok(store.get().forms)
-  
+  form.store.set({
+    form1Data: {
+      name: 'Rob',
+      world: 'test'
+    }
+  })
+
+  t.ok(form.store.get().forms.form1.isDirty)
+
+  form.destroy();
+});
+
+test.only('when a Form has FormElements and each of them is valid then form.isValid becomes true', async (t) => {
+  const div = document.createElement('div');
+  document.body.appendChild(div);
+
+  const store = new Store({});
+
+  store.set({
+    form1Data: {
+      name: 'Rob',
+      world: 'test'
+    }
+  })
+
+  const form = new Form1({
+    target,
+    store,
+  });
+
+
+
+  t.ok(form.store.get().forms.form1.isValid)
+
   // form.destroy();
 });
 

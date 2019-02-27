@@ -3,7 +3,7 @@
     <div>
         <label for="Name">Name:</label>
         <FormElement belongsTo="form1" name="Name" bind:value="$form1Data.name" isRequired={true}
-            pattern="Rob|Tom|Kev" />
+            pattern="Rob|Tom|Kev"  />
     </div>
     <br />
     <div>

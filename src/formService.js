@@ -29,8 +29,13 @@ export const createForm = (state, {
     return state.store.get().forms
 }
 
+export const handleFormElementStateChange = () => {
+    console.log('object');
+}
+
 export const checkFormIsValid = (form) => {
     let isValid = true;
+    // console.log('form.formElements :', form.formElements);
     Object.values(form.formElements).forEach(element => {
         if (isValid) {
             isValid = element.isValid || false;

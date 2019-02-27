@@ -21,7 +21,7 @@ async function go() {
   page.on('console', msg => {
     console[msg.type()](msg.text());
   });
-
+  
   await page.goto(`http://localhost:${port}`);
 
   await page.evaluate(() => done);
