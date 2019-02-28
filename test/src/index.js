@@ -3,9 +3,6 @@ import { Store } from 'svelte/store.js';
 import FormElement from '../../src/FormElement.svelte';
 import Form1 from './examples/Form1.svelte';
 
-import { createForm } from '../../src/formService';
-
-
 import { assert, test, done } from 'tape-modern';
 
 
@@ -82,9 +79,6 @@ assert.htmlEqual = (a, b, msg) => {
 
 // tests
 test('when a FormElement is present on page then a "forms" object is created on the store', async (t) => {
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   const store = new Store({});
 
   store.set({
@@ -106,9 +100,6 @@ test('when a FormElement is present on page then a "forms" object is created on 
 
 
 test('when a Form has FormElements and form is interacted with then form.isDirty becomes true', async (t) => {
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   const store = new Store({});
 
   store.set({
@@ -136,9 +127,6 @@ test('when a Form has FormElements and form is interacted with then form.isDirty
 });
 
 test('when a Form has FormElements and each of them is valid then form.isValid becomes true', async (t) => {
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   const store = new Store({});
 
   store.set({
@@ -160,9 +148,6 @@ test('when a Form has FormElements and each of them is valid then form.isValid b
 });
 
 test('when a FormElement value has changed then isDirty becomes true on local and global store', async (t) => {
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   const store = new Store({});
 
   store.set({
@@ -195,9 +180,6 @@ test('when a FormElement value has changed then isDirty becomes true on local an
 });
 
 test('when a FormElement value has changed then check and set validity (isValid) on local and global store', async (t) => {
-  const div = document.createElement('div');
-  document.body.appendChild(div);
-
   const store = new Store({});
 
   const form = new FormElement({
@@ -225,7 +207,39 @@ test('when a FormElement value has changed then check and set validity (isValid)
   form.destroy();
 });
 
+test('when Form reset button is clicked on Form then reset original form state', async (t) => {
+  const store = new Store({});
+
+  store.set({
+    form1Data: {
+      name: '',
+      world: 'test'
+    }
+  })
+
+  const form = new Form1({
+    target,
+    store,
+  });
+
+  t.ok(form.store.get().form1Data.world === 'test');
+
+  store.set({
+    form1Data: {
+      name: '',
+      world: 'blah'
+    }
+  })
+  
+  t.ok(form.store.get().form1Data.world === 'blah');
+  document.querySelector('.resetButton').click();
+  t.ok(form.store.get().form1Data.world === 'test');
+
+  // form.destroy();
+});
+
 // TODO: Tests...
+// Reset form data
 
 
 

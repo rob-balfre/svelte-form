@@ -189,27 +189,19 @@
 	const createForm = (state, {
 	    name,
 	    formElements,
-	    data,
-	    onChange,
-	    handleReset,
-	    handleSubmit
+	    data    
 	}) => {
 	    if (!state && !state.store) return;
-	    let emptyFn = () => { };
 
 	    let { forms } = state.store.get();
 
 	    forms = forms || {};
-
 	    forms[name] = {
 	        name,
 	        formElements: formElements || {},
 	        data: data || {},
 	        isDirty: false,
 	        hasSubmitted: false,
-	        onChange: onChange || emptyFn,
-	        handleReset: handleReset || emptyFn,
-	        handleSubmit: handleSubmit || emptyFn
 	    };
 
 	    state.store.set({ forms });
@@ -219,7 +211,7 @@
 
 	const checkFormIsValid = (form) => {
 	    let isValid = true;
-	    // console.log('form.formElements :', form.formElements);
+	    
 	    Object.values(form.formElements).forEach(element => {
 	        if (isValid) {
 	            isValid = element.isValid || false;
@@ -245,17 +237,30 @@
 	        isRequired: false,
 	        isValid: undefined,
 	        isDirty: false,
-	        onChange: () => { },
-	        handleClear: () => { },
-	        handleValidation: () => { },
-	        ref: undefined
+	        ref: undefined,
+	        originalValue: undefined
 	    }
 	}
 	function oncreate() {
 	    setTimeout(() => {
 	        this.set({ ref: this.refs.input });
-
 	    }, 0);
+
+
+	    const listener = this.store.on('state', ({ current, changed }) => {
+	        const { name, belongsTo, originalValue } = this.get();
+	        const form = current.forms[belongsTo];
+
+	        if (form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
+	            this.set({ value: JSON.parse(originalValue) });
+
+	            form.shouldReset += 1;
+	            this.store.set({ form });
+	        }
+	    });
+
+
+	    this.on('destroy', listener.cancel);
 	}
 	function onstate({ changed, current, previous }) {
 	    const {
@@ -264,10 +269,7 @@
 	        value,
 	        isValid,
 	        isRequired,
-	        isDirty,
-	        onChange,
-	        handleClear,
-	        handleValidation } = current;
+	        isDirty } = current;
 
 	    if (!this.store) return console.warn('No store found.');
 	    if (!name) return console.warn('No name set.');
@@ -284,7 +286,10 @@
 	    }
 	    let form = forms[belongsTo];
 	    let element = form.formElements[name];
+
 	    if (!element) {
+	        const originalValue = JSON.stringify(value);
+
 	        form.formElements[name] = {
 	            belongsTo,
 	            name,
@@ -292,12 +297,11 @@
 	            isRequired,
 	            isValid,
 	            isDirty,
-	            onChange,
-	            handleClear,
-	            handleValidation
+	            originalValue
 	        };
 
 	        element = form.formElements[name];
+	        this.set({ originalValue });
 	    }
 
 	    if (previous && !current.isDirty && changed.value) {

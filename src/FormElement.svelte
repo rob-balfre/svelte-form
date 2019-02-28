@@ -42,10 +42,8 @@
                 isRequired: false,
                 isValid: undefined,
                 isDirty: false,
-                onChange: () => { },
-                handleClear: () => { },
-                handleValidation: () => { },
-                ref: undefined
+                ref: undefined,
+                originalValue: undefined
             }
         },
         computed: {
@@ -61,10 +59,7 @@
                 value,
                 isValid,
                 isRequired,
-                isDirty,
-                onChange,
-                handleClear,
-                handleValidation } = current;
+                isDirty } = current;
 
             if (!this.store) return console.warn('No store found.');
             if (!name) return console.warn('No name set.');
@@ -82,7 +77,10 @@
 
             let form = forms[belongsTo];
             let element = form.formElements[name];
+
             if (!element) {
+                const originalValue = JSON.stringify(value);
+
                 form.formElements[name] = {
                     belongsTo,
                     name,
@@ -90,12 +88,11 @@
                     isRequired,
                     isValid,
                     isDirty,
-                    onChange,
-                    handleClear,
-                    handleValidation
+                    originalValue
                 }
 
                 element = form.formElements[name];
+                this.set({ originalValue });
             };
 
 
@@ -117,8 +114,23 @@
         oncreate() {
             setTimeout(() => {
                 this.set({ ref: this.refs.input });
-
             }, 0);
+
+
+            const listener = this.store.on('state', ({ current, changed }) => {
+                const { name, belongsTo, originalValue } = this.get();
+                const form = current.forms[belongsTo];
+
+                if (form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
+                    this.set({ value: JSON.parse(originalValue) });
+
+                    form.shouldReset += 1;
+                    this.store.set({ form })
+                }
+            });
+
+
+            this.on('destroy', listener.cancel);
         }
     }
 </script>

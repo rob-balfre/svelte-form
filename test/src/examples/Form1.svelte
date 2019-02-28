@@ -1,15 +1,20 @@
 <h1>Form</h1>
-<Form name="form1" hasSubmitButton={true}>
+<Form name="form1" hasSubmitButton={true} hasResetButton={true}>
     <div>
         <label for="Name">Name:</label>
         <FormElement belongsTo="form1" name="Name" bind:value="$form1Data.name" isRequired={true}
-            pattern="Rob|Tom|Kev"  />
+            pattern="Rob|Tom|Kev" />
     </div>
     <br />
     <div>
         <label for="world">World:</label>
         <FormElement belongsTo="form1" name="world" bind:value="$form1Data.world" isRequired={true} minlength="3"
             maxlength="6" />
+    </div>
+    <br />
+    <div>
+        <label for="world">Magic:</label>
+        <FormElement belongsTo="form1" name="magic" bind:value="$form1Data.magic" isRequired={true}  />
     </div>
     <br />
 </Form>

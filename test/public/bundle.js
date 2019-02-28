@@ -24559,27 +24559,19 @@
 	const createForm = (state, {
 	    name,
 	    formElements,
-	    data,
-	    onChange,
-	    handleReset,
-	    handleSubmit
+	    data    
 	}) => {
 	    if (!state && !state.store) return;
-	    let emptyFn = () => { };
 
 	    let { forms } = state.store.get();
 
 	    forms = forms || {};
-
 	    forms[name] = {
 	        name,
 	        formElements: formElements || {},
 	        data: data || {},
 	        isDirty: false,
 	        hasSubmitted: false,
-	        onChange: onChange || emptyFn,
-	        handleReset: handleReset || emptyFn,
-	        handleSubmit: handleSubmit || emptyFn
 	    };
 
 	    state.store.set({ forms });
@@ -24589,7 +24581,7 @@
 
 	const checkFormIsValid = (form) => {
 	    let isValid = true;
-	    // console.log('form.formElements :', form.formElements);
+	    
 	    Object.values(form.formElements).forEach(element => {
 	        if (isValid) {
 	            isValid = element.isValid || false;
@@ -24615,17 +24607,30 @@
 	        isRequired: false,
 	        isValid: undefined,
 	        isDirty: false,
-	        onChange: () => { },
-	        handleClear: () => { },
-	        handleValidation: () => { },
-	        ref: undefined
+	        ref: undefined,
+	        originalValue: undefined
 	    }
 	}
 	function oncreate() {
 	    setTimeout(() => {
 	        this.set({ ref: this.refs.input });
-
 	    }, 0);
+
+
+	    const listener = this.store.on('state', ({ current, changed }) => {
+	        const { name, belongsTo, originalValue } = this.get();
+	        const form = current.forms[belongsTo];
+
+	        if (form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
+	            this.set({ value: JSON.parse(originalValue) });
+
+	            form.shouldReset += 1;
+	            this.store.set({ form });
+	        }
+	    });
+
+
+	    this.on('destroy', listener.cancel);
 	}
 	function onstate({ changed, current, previous }) {
 	    const {
@@ -24634,10 +24639,7 @@
 	        value,
 	        isValid,
 	        isRequired,
-	        isDirty,
-	        onChange,
-	        handleClear,
-	        handleValidation } = current;
+	        isDirty } = current;
 
 	    if (!this.store) return console.warn('No store found.');
 	    if (!name) return console.warn('No name set.');
@@ -24654,7 +24656,10 @@
 	    }
 	    let form = forms[belongsTo];
 	    let element = form.formElements[name];
+
 	    if (!element) {
+	        const originalValue = JSON.stringify(value);
+
 	        form.formElements[name] = {
 	            belongsTo,
 	            name,
@@ -24662,12 +24667,11 @@
 	            isRequired,
 	            isValid,
 	            isDirty,
-	            onChange,
-	            handleClear,
-	            handleValidation
+	            originalValue
 	        };
 
 	        element = form.formElements[name];
+	        this.set({ originalValue });
 	    }
 
 	    if (previous && !current.isDirty && changed.value) {
@@ -24874,14 +24878,27 @@
 
 	function data$1() {
 	    return {
-	        hasSubmitButton: false
+	        name: undefined,
+	        hasSubmitButton: false,
+	        hasResetButton: false
 	    }
 	}
 	var methods = {
+	    handleReset(event) {
+	        event.preventDefault();
+	        
+	        const { name } = this.get();
+	        const { forms } = this.store.get();
+	        let form = forms[name];
+	        if (form) {
+	            form.shouldReset = 0;                
+	            this.store.set({ forms });
+	        }
+	    },
 	    handleSubmit(event) {
 	        event.preventDefault();
-	        const {name} = this.get();
-	        const {forms} = this.store.get();
+	        const { name } = this.get();
+	        const { forms } = this.store.get();
 	        const form = forms[name];
 	        if (form.isValid) {
 	            form.hasSubmitted = true;
@@ -24892,9 +24909,11 @@
 	};
 
 	function create_main_fragment$1(component, ctx) {
-		var form, slot_content_default = component._slotted.default, slot_content_default_after, text;
+		var form, slot_content_default = component._slotted.default, slot_content_default_after, text0, text1;
 
-		var if_block = (ctx.hasSubmitButton) && create_if_block$1(component, ctx);
+		var if_block0 = (ctx.hasSubmitButton) && create_if_block_1(component, ctx);
+
+		var if_block1 = (ctx.hasResetButton) && create_if_block$1(component, ctx);
 
 		function submit_handler(event) {
 			component.handleSubmit(event);
@@ -24903,8 +24922,10 @@
 		return {
 			c() {
 				form = createElement("form");
-				text = createText("\n\n    ");
-				if (if_block) if_block.c();
+				text0 = createText("\n\n    ");
+				if (if_block0) if_block0.c();
+				text1 = createText("\n\n    ");
+				if (if_block1) if_block1.c();
 				addListener(form, "submit", submit_handler);
 			},
 
@@ -24916,20 +24937,33 @@
 					append(form, slot_content_default_after || (slot_content_default_after = createComment()));
 				}
 
-				append(form, text);
-				if (if_block) if_block.m(form, null);
+				append(form, text0);
+				if (if_block0) if_block0.m(form, null);
+				append(form, text1);
+				if (if_block1) if_block1.m(form, null);
 			},
 
 			p(changed, ctx) {
 				if (ctx.hasSubmitButton) {
-					if (!if_block) {
-						if_block = create_if_block$1(component, ctx);
-						if_block.c();
-						if_block.m(form, null);
+					if (!if_block0) {
+						if_block0 = create_if_block_1(component, ctx);
+						if_block0.c();
+						if_block0.m(form, text1);
 					}
-				} else if (if_block) {
-					if_block.d(1);
-					if_block = null;
+				} else if (if_block0) {
+					if_block0.d(1);
+					if_block0 = null;
+				}
+
+				if (ctx.hasResetButton) {
+					if (!if_block1) {
+						if_block1 = create_if_block$1(component, ctx);
+						if_block1.c();
+						if_block1.m(form, null);
+					}
+				} else if (if_block1) {
+					if_block1.d(1);
+					if_block1 = null;
 				}
 			},
 
@@ -24942,14 +24976,15 @@
 					reinsertBefore(slot_content_default_after, slot_content_default);
 				}
 
-				if (if_block) if_block.d();
+				if (if_block0) if_block0.d();
+				if (if_block1) if_block1.d();
 				removeListener(form, "submit", submit_handler);
 			}
 		};
 	}
 
 	// (4:4) {#if hasSubmitButton}
-	function create_if_block$1(component, ctx) {
+	function create_if_block_1(component, ctx) {
 		var button;
 
 		return {
@@ -24967,6 +25002,36 @@
 				if (detach) {
 					detachNode(button);
 				}
+			}
+		};
+	}
+
+	// (8:4) {#if hasResetButton}
+	function create_if_block$1(component, ctx) {
+		var button;
+
+		function click_handler(event) {
+			component.handleReset(event);
+		}
+
+		return {
+			c() {
+				button = createElement("button");
+				button.textContent = "Reset";
+				addListener(button, "click", click_handler);
+				button.className = "resetButton";
+			},
+
+			m(target, anchor) {
+				insert(target, button, anchor);
+			},
+
+			d(detach) {
+				if (detach) {
+					detachNode(button);
+				}
+
+				removeListener(button, "click", click_handler);
 			}
 		};
 	}
@@ -25008,7 +25073,7 @@
 	}
 
 	function create_main_fragment$2(component, ctx) {
-		var h1, text1, div0, label0, text3, formelement0_updating = {}, text4, br0, text5, div1, label1, text7, formelement1_updating = {}, text8, br1, text9, text10, if_block1_anchor;
+		var h1, text1, div0, label0, text3, formelement0_updating = {}, text4, br0, text5, div1, label1, text7, formelement1_updating = {}, text8, br1, text9, div2, label2, text11, formelement2_updating = {}, text12, br2, text13, text14, if_block1_anchor;
 
 		var formelement0_initial_data = {
 		 	belongsTo: "form1",
@@ -25069,9 +25134,38 @@
 			formelement1._bind({ value: 1 }, formelement1.get());
 		});
 
+		var formelement2_initial_data = {
+		 	belongsTo: "form1",
+		 	name: "magic",
+		 	isRequired: true
+		 };
+		if (ctx.$form1Data.magic !== void 0) {
+			formelement2_initial_data.value = ctx.$form1Data.magic;
+			formelement2_updating.value = true;
+		}
+		var formelement2 = new FormElement({
+			root: component.root,
+			store: component.store,
+			data: formelement2_initial_data,
+			_bind(changed, childState) {
+				var newStoreState = {};
+				if (!formelement2_updating.value && changed.value) {
+					ctx.$form1Data.magic = childState.value;
+					newStoreState.form1Data = ctx.$form1Data;
+				}
+				component.store.set(newStoreState);
+				formelement2_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(() => {
+			formelement2._bind({ value: 1 }, formelement2.get());
+		});
+
 		var form_initial_data = {
 		 	name: "form1",
-		 	hasSubmitButton: true
+		 	hasSubmitButton: true,
+		 	hasResetButton: true
 		 };
 		var form = new Form({
 			root: component.root,
@@ -25080,7 +25174,7 @@
 			data: form_initial_data
 		});
 
-		var if_block0 = (ctx.$form1Data) && create_if_block_1(component, ctx);
+		var if_block0 = (ctx.$form1Data) && create_if_block_1$1(component, ctx);
 
 		var if_block1 = (ctx.$forms) && create_if_block$2(component, ctx);
 
@@ -25104,14 +25198,23 @@
 				formelement1._fragment.c();
 				text8 = createText("\n    ");
 				br1 = createElement("br");
+				text9 = createText("\n    ");
+				div2 = createElement("div");
+				label2 = createElement("label");
+				label2.textContent = "Magic:";
+				text11 = createText("\n        ");
+				formelement2._fragment.c();
+				text12 = createText("\n    ");
+				br2 = createElement("br");
 				form._fragment.c();
-				text9 = createText("\n\n");
+				text13 = createText("\n\n");
 				if (if_block0) if_block0.c();
-				text10 = createText("\n\n");
+				text14 = createText("\n\n");
 				if (if_block1) if_block1.c();
 				if_block1_anchor = createComment();
 				label0.htmlFor = "Name";
 				label1.htmlFor = "world";
+				label2.htmlFor = "world";
 			},
 
 			m(target, anchor) {
@@ -25130,10 +25233,17 @@
 				formelement1._mount(div1, null);
 				append(form._slotted.default, text8);
 				append(form._slotted.default, br1);
+				append(form._slotted.default, text9);
+				append(form._slotted.default, div2);
+				append(div2, label2);
+				append(div2, text11);
+				formelement2._mount(div2, null);
+				append(form._slotted.default, text12);
+				append(form._slotted.default, br2);
 				form._mount(target, anchor);
-				insert(target, text9, anchor);
+				insert(target, text13, anchor);
 				if (if_block0) if_block0.m(target, anchor);
-				insert(target, text10, anchor);
+				insert(target, text14, anchor);
 				if (if_block1) if_block1.m(target, anchor);
 				insert(target, if_block1_anchor, anchor);
 			},
@@ -25156,13 +25266,21 @@
 				formelement1._set(formelement1_changes);
 				formelement1_updating = {};
 
+				var formelement2_changes = {};
+				if (!formelement2_updating.value && changed.$form1Data) {
+					formelement2_changes.value = ctx.$form1Data.magic;
+					formelement2_updating.value = ctx.$form1Data.magic !== void 0;
+				}
+				formelement2._set(formelement2_changes);
+				formelement2_updating = {};
+
 				if (ctx.$form1Data) {
 					if (if_block0) {
 						if_block0.p(changed, ctx);
 					} else {
-						if_block0 = create_if_block_1(component, ctx);
+						if_block0 = create_if_block_1$1(component, ctx);
 						if_block0.c();
-						if_block0.m(text10.parentNode, text10);
+						if_block0.m(text14.parentNode, text14);
 					}
 				} else if (if_block0) {
 					if_block0.d(1);
@@ -25191,14 +25309,15 @@
 
 				formelement0.destroy();
 				formelement1.destroy();
+				formelement2.destroy();
 				form.destroy(detach);
 				if (detach) {
-					detachNode(text9);
+					detachNode(text13);
 				}
 
 				if (if_block0) if_block0.d(detach);
 				if (detach) {
-					detachNode(text10);
+					detachNode(text14);
 				}
 
 				if (if_block1) if_block1.d(detach);
@@ -25209,8 +25328,8 @@
 		};
 	}
 
-	// (17:0) {#if $form1Data}
-	function create_if_block_1(component, ctx) {
+	// (22:0) {#if $form1Data}
+	function create_if_block_1$1(component, ctx) {
 		var h2, text_1, each_anchor;
 
 		var each_value = ctx.Object.entries(ctx.$form1Data);
@@ -25283,7 +25402,7 @@
 		};
 	}
 
-	// (19:0) {#each Object.entries($form1Data) as [key, val]}
+	// (24:0) {#each Object.entries($form1Data) as [key, val]}
 	function create_each_block(component, ctx) {
 		var p, text0_value = ctx.key, text0, text1, text2_value = ctx.val, text2;
 
@@ -25320,7 +25439,7 @@
 		};
 	}
 
-	// (24:0) {#if $forms}
+	// (29:0) {#if $forms}
 	function create_if_block$2(component, ctx) {
 		var h2, text1, p0, text2, text3_value = ctx.$forms.form1.isValid, text3, text4, p1, text5, text6_value = ctx.$forms.form1.isDirty, text6, text7, p2, text8, text9_value = ctx.$forms.form1.hasSubmitted, text9;
 
@@ -25733,9 +25852,6 @@
 
 	// tests
 	test('when a FormElement is present on page then a "forms" object is created on the store', async (t) => {
-	  const div = document.createElement('div');
-	  document.body.appendChild(div);
-
 	  const store = new Store({});
 
 	  store.set({
@@ -25757,9 +25873,6 @@
 
 
 	test('when a Form has FormElements and form is interacted with then form.isDirty becomes true', async (t) => {
-	  const div = document.createElement('div');
-	  document.body.appendChild(div);
-
 	  const store = new Store({});
 
 	  store.set({
@@ -25787,9 +25900,6 @@
 	});
 
 	test('when a Form has FormElements and each of them is valid then form.isValid becomes true', async (t) => {
-	  const div = document.createElement('div');
-	  document.body.appendChild(div);
-
 	  const store = new Store({});
 
 	  store.set({
@@ -25811,9 +25921,6 @@
 	});
 
 	test('when a FormElement value has changed then isDirty becomes true on local and global store', async (t) => {
-	  const div = document.createElement('div');
-	  document.body.appendChild(div);
-
 	  const store = new Store({});
 
 	  store.set({
@@ -25846,9 +25953,6 @@
 	});
 
 	test('when a FormElement value has changed then check and set validity (isValid) on local and global store', async (t) => {
-	  const div = document.createElement('div');
-	  document.body.appendChild(div);
-
 	  const store = new Store({});
 
 	  const form = new FormElement({
@@ -25874,6 +25978,37 @@
 	  t.ok(form.store.get().forms.form1.formElements.name.isValid);
 
 	  form.destroy();
+	});
+
+	test('when Form reset button is clicked on Form then reset original form state', async (t) => {
+	  const store = new Store({});
+
+	  store.set({
+	    form1Data: {
+	      name: '',
+	      world: 'test'
+	    }
+	  });
+
+	  const form = new Form1({
+	    target,
+	    store,
+	  });
+
+	  t.ok(form.store.get().form1Data.world === 'test');
+
+	  store.set({
+	    form1Data: {
+	      name: '',
+	      world: 'blah'
+	    }
+	  });
+	  
+	  t.ok(form.store.get().form1Data.world === 'blah');
+	  document.querySelector('.resetButton').click();
+	  t.ok(form.store.get().form1Data.world === 'test');
+
+	  // form.destroy();
 	});
 
 	// this allows us to close puppeteer once tests have completed
