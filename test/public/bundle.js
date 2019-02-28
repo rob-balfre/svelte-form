@@ -24703,7 +24703,7 @@
 				small0 = createElement("small");
 				text1 = createText("isDirty: ");
 				text2 = createText(ctx.isDirty);
-				text3 = createText(" ");
+				text3 = createText(" \n    ");
 				br = createElement("br");
 				text4 = createText("\n    ");
 				small1 = createElement("small");
@@ -24759,7 +24759,7 @@
 		};
 	}
 
-	// (3:0) {#if type === 'text'}
+	// (1:0) {#if type === 'text'}
 	function create_if_block(component, ctx) {
 		var input, input_updating = false, input_pattern_value, input_minlength_value, input_maxlength_value;
 
@@ -25810,7 +25810,7 @@
 	  form.destroy();
 	});
 
-	test.only('when a FormElements value has changed then isDirty becomes true on local and global store', async (t) => {
+	test('when a FormElement value has changed then isDirty becomes true on local and global store', async (t) => {
 	  const div = document.createElement('div');
 	  document.body.appendChild(div);
 
@@ -25841,6 +25841,37 @@
 
 	  t.ok(form.get().isDirty);
 	  t.ok(form.store.get().forms.form1.formElements.name.isDirty);
+
+	  form.destroy();
+	});
+
+	test('when a FormElement value has changed then check and set validity (isValid) on local and global store', async (t) => {
+	  const div = document.createElement('div');
+	  document.body.appendChild(div);
+
+	  const store = new Store({});
+
+	  const form = new FormElement({
+	    target,
+	    store,
+	    data: {
+	      belongsTo: 'form1',
+	      name: 'name',
+	      value: '',
+	      pattern: 'Rob|Tom|Kev',
+	      isRequired: true
+	    }
+	  });
+
+
+	  t.ok(!form.get().isValid);
+	  t.ok(!form.store.get().forms.form1.formElements.name.isValid);
+
+	  form.set({ value: 'Rob' });
+
+	  await wait(0);
+	  t.ok(form.get().isValid);
+	  t.ok(form.store.get().forms.form1.formElements.name.isValid);
 
 	  form.destroy();
 	});

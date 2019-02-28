@@ -327,7 +327,7 @@ function create_main_fragment(component, ctx) {
 			small0 = createElement("small");
 			text1 = createText("isDirty: ");
 			text2 = createText(ctx.isDirty);
-			text3 = createText(" ");
+			text3 = createText(" \n    ");
 			br = createElement("br");
 			text4 = createText("\n    ");
 			small1 = createElement("small");
@@ -383,7 +383,7 @@ function create_main_fragment(component, ctx) {
 	};
 }
 
-// (3:0) {#if type === 'text'}
+// (1:0) {#if type === 'text'}
 function create_if_block(component, ctx) {
 	var input, input_updating = false, input_pattern_value, input_minlength_value, input_maxlength_value;
 

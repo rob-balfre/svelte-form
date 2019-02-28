@@ -1,5 +1,3 @@
-<!-- {#if show} -->
-
 {#if type === 'text'}
 <input
     ref:input
@@ -15,11 +13,10 @@
 {/if}
 
 <div>
-    <small>isDirty: { isDirty }</small> <br />
+    <small>isDirty: { isDirty }</small> 
+    <br />
     <small>isValid: { isValid }</small>
 </div>
-
-<!-- {/if} -->
 
 <style>
     input:valid {

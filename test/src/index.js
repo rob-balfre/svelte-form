@@ -159,7 +159,7 @@ test('when a Form has FormElements and each of them is valid then form.isValid b
   form.destroy();
 });
 
-test.only('when a FormElements value has changed then isDirty becomes true on local and global store', async (t) => {
+test('when a FormElement value has changed then isDirty becomes true on local and global store', async (t) => {
   const div = document.createElement('div');
   document.body.appendChild(div);
 
@@ -194,9 +194,39 @@ test.only('when a FormElements value has changed then isDirty becomes true on lo
   form.destroy();
 });
 
+test('when a FormElement value has changed then check and set validity (isValid) on local and global store', async (t) => {
+  const div = document.createElement('div');
+  document.body.appendChild(div);
+
+  const store = new Store({});
+
+  const form = new FormElement({
+    target,
+    store,
+    data: {
+      belongsTo: 'form1',
+      name: 'name',
+      value: '',
+      pattern: 'Rob|Tom|Kev',
+      isRequired: true
+    }
+  });
+
+
+  t.ok(!form.get().isValid)
+  t.ok(!form.store.get().forms.form1.formElements.name.isValid)
+
+  form.set({ value: 'Rob' });
+
+  await wait(0);
+  t.ok(form.get().isValid)
+  t.ok(form.store.get().forms.form1.formElements.name.isValid)
+
+  form.destroy();
+});
+
 // TODO: Tests...
-// FormElement isDirty
-// FormElement isValid
+
 
 
 
