@@ -36,10 +36,6 @@
 		return document.createTextNode(data);
 	}
 
-	function createComment() {
-		return document.createComment('');
-	}
-
 	function addListener(node, event, handler, options) {
 		node.addEventListener(event, handler, options);
 	}
@@ -177,10 +173,6 @@
 		this._fragment[this._fragment.i ? 'i' : 'm'](target, anchor || null);
 	}
 
-	function removeFromStore() {
-		this.store._remove(this);
-	}
-
 	var proto = {
 		destroy,
 		get,
@@ -240,7 +232,6 @@
 
 	function isValid({ value, ref }) {
 	    if (!value || !ref) return false;
-	    console.log('COMP');
 	    return ref.checkValidity()
 	}
 
@@ -252,7 +243,7 @@
 	        name: undefined,
 	        value: undefined,
 	        isRequired: false,
-	        // isValid: undefined,
+	        isValid: undefined,
 	        isDirty: false,
 	        onChange: () => { },
 	        handleClear: () => { },
@@ -261,9 +252,35 @@
 	    }
 	}
 	function oncreate() {
-	    const { name, belongsTo, value, isRequired, isValid, isDirty, onChange, handleClear, handleValidation } = this.get();
-	    if (!this.store && !name && !belongsTo) return console.warn('No store found.');
+
+	    setTimeout(() => {
+	        this.set({ref: this.refs.input});
+	    
+	    }, 0);
+
+
+
+	    // console.log('W T F', this.refs);
+	    // if (this.refs.input) {
+	    //     console.log('this.get() :', this.get());
+	    //     console.log('BLAH');
+	    // }
+	}
+	function onstate({ changed, current, previous }) {
+	    if (!this.store && !current.name && !current.belongsTo) return console.warn('No store found.');
+
 	    let { forms } = this.store.get();
+	    const { 
+	        belongsTo, 
+	        name,
+	        value,
+	        isValid,
+	        isRequired,
+	        isDirty,
+	        onChange,
+	        handleClear,
+	        handleValidation } = current;
+
 	    if (!forms) {
 	        forms = createForm(this, {
 	            name: belongsTo,
@@ -272,55 +289,24 @@
 	            }
 	        });
 	    }
-
-	    const form = forms[belongsTo];
-	    if (!form) return console.warn('No form with that name is registered with this store.')
-
-
-	    console.log('isValid :', isValid);
-
-	    form.formElements[name] = {
-	        belongsTo,
-	        name,
-	        value,
-	        isRequired,
-	        isValid,
-	        isDirty,
-	        onChange,
-	        handleClear,
-	        handleValidation
-	    };
-
+	    let form = forms[belongsTo];
+	    let element = form.formElements[name];
 	    
-	    // element.isValid = isValid;
+	    if (!element) {
+	        form.formElements[name] = {
+	            belongsTo,
+	            name,
+	            value,
+	            isRequired,
+	            isValid,
+	            isDirty,
+	            onChange,
+	            handleClear,
+	            handleValidation
+	        };
 
-	    form.isValid = checkFormIsValid(form);
-
-	    this.store.set({
-	        forms
-	    });
-
-	    this.set({
-	        show: true
-	    });
-	}
-	function onstate({ changed, current, previous }) {
-	    const { forms } = this.store.get();
-	    // console.log('ONE');
-	    if (!forms) return;
-
-	    const form = forms[current.belongsTo];
-	    // console.log('TWO');
-	    if (!form) return;
-
-	    const element = form.formElements[current.name];
-	    // console.log('THREE');
-	    if (!element) return;
-
-	    const input = this.refs.input;
-	    // console.log('FOUR');
-	    if (!input) return;
-	    this.set({ref: input});
+	        element = form.formElements[name];        
+	    }
 
 	    if (!current.isDirty && changed.value) {
 	        form.isDirty = true;
@@ -328,15 +314,8 @@
 	        this.set({ isDirty: true });
 	    }
 
-	    // if (changed.value) {
-	        console.log('FIVE');
-	        const {isValid} = this.get();
-	        element.isValid = isValid;
-
-	        console.log('element.isValid :', element.isValid);
-
-	        form.isValid = checkFormIsValid(form);
-	    // }
+	    element.isValid = isValid;
+	    form.isValid = checkFormIsValid(form);
 
 	    this.store.set({
 	        forms
@@ -350,50 +329,9 @@
 	}
 
 	function create_main_fragment(component, ctx) {
-		var if_block_anchor;
+		var text0, div, small0, text1, text2, text3, br, text4, small1, text5, text6;
 
-		var if_block = (ctx.show) && create_if_block(component, ctx);
-
-		return {
-			c() {
-				if (if_block) if_block.c();
-				if_block_anchor = createComment();
-			},
-
-			m(target, anchor) {
-				if (if_block) if_block.m(target, anchor);
-				insert(target, if_block_anchor, anchor);
-			},
-
-			p(changed, ctx) {
-				if (ctx.show) {
-					if (if_block) {
-						if_block.p(changed, ctx);
-					} else {
-						if_block = create_if_block(component, ctx);
-						if_block.c();
-						if_block.m(if_block_anchor.parentNode, if_block_anchor);
-					}
-				} else if (if_block) {
-					if_block.d(1);
-					if_block = null;
-				}
-			},
-
-			d(detach) {
-				if (if_block) if_block.d(detach);
-				if (detach) {
-					detachNode(if_block_anchor);
-				}
-			}
-		};
-	}
-
-	// (1:0) {#if show}
-	function create_if_block(component, ctx) {
-		var text0, div, small0, text1, text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty, text2, text3, br, text4, small1, text5, text6;
-
-		var if_block = (ctx.type === 'text') && create_if_block_1(component, ctx);
+		var if_block = (ctx.type === 'text') && create_if_block(component, ctx);
 
 		return {
 			c() {
@@ -402,7 +340,7 @@
 				div = createElement("div");
 				small0 = createElement("small");
 				text1 = createText("isDirty: ");
-				text2 = createText(text2_value);
+				text2 = createText(ctx.isDirty);
 				text3 = createText(" ");
 				br = createElement("br");
 				text4 = createText("\n    ");
@@ -431,7 +369,7 @@
 					if (if_block) {
 						if_block.p(changed, ctx);
 					} else {
-						if_block = create_if_block_1(component, ctx);
+						if_block = create_if_block(component, ctx);
 						if_block.c();
 						if_block.m(text0.parentNode, text0);
 					}
@@ -440,8 +378,8 @@
 					if_block = null;
 				}
 
-				if ((changed.$forms || changed.belongsTo || changed.name) && text2_value !== (text2_value = ctx.$forms[ctx.belongsTo].formElements[ctx.name].isDirty)) {
-					setData(text2, text2_value);
+				if (changed.isDirty) {
+					setData(text2, ctx.isDirty);
 				}
 
 				if (changed.isValid) {
@@ -460,7 +398,7 @@
 	}
 
 	// (3:0) {#if type === 'text'}
-	function create_if_block_1(component, ctx) {
+	function create_if_block(component, ctx) {
 		var input, input_updating = false, input_pattern_value, input_minlength_value, input_maxlength_value;
 
 		function input_input_handler() {
@@ -476,7 +414,7 @@
 				input.className = "" + ctx.classes + " svelte-z44360";
 				input.id = ctx.name;
 				input.required = ctx.isRequired;
-				input.pattern = input_pattern_value = ctx.pattern || '*';
+				input.pattern = input_pattern_value = ctx.pattern || '.*?';
 				setAttribute(input, "minlength", input_minlength_value = ctx.minlength || 0);
 				input.maxLength = input_maxlength_value = ctx.maxlength || 9999;
 				input.name = ctx.name;
@@ -505,7 +443,7 @@
 					input.required = ctx.isRequired;
 				}
 
-				if ((changed.pattern) && input_pattern_value !== (input_pattern_value = ctx.pattern || '*')) {
+				if ((changed.pattern) && input_pattern_value !== (input_pattern_value = ctx.pattern || '.*?')) {
 					input.pattern = input_pattern_value;
 				}
 
@@ -536,15 +474,12 @@
 	function FormElement(options) {
 		init(this, options);
 		this.refs = {};
-		this._state = assign(assign(this.store._init(["forms"]), data()), options.data);
-		this.store._add(this, ["forms"]);
+		this._state = assign(data(), options.data);
 
 		this._recompute({ value: 1, ref: 1 }, this._state);
 		this._intro = true;
 
 		this._handlers.state = [onstate];
-
-		this._handlers.destroy = [removeFromStore];
 
 		if (!document.getElementById("svelte-z44360-style")) add_css();
 

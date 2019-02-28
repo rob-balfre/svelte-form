@@ -135,7 +135,7 @@ test('when a Form has FormElements and form is interacted with then form.isDirty
   form.destroy();
 });
 
-test.only('when a Form has FormElements and each of them is valid then form.isValid becomes true', async (t) => {
+test('when a Form has FormElements and each of them is valid then form.isValid becomes true', async (t) => {
   const div = document.createElement('div');
   document.body.appendChild(div);
 
@@ -153,11 +153,10 @@ test.only('when a Form has FormElements and each of them is valid then form.isVa
     store,
   });
 
-
-
+  await wait(0);
   t.ok(form.store.get().forms.form1.isValid)
 
-  // form.destroy();
+  form.destroy();
 });
 
 // TODO: Tests...
