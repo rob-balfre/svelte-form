@@ -24611,7 +24611,7 @@
 	        type: 'text',
 	        belongsTo: undefined,
 	        name: undefined,
-	        value: undefined,
+	        value: '',
 	        isRequired: false,
 	        isValid: undefined,
 	        isDirty: false,
@@ -24622,26 +24622,14 @@
 	    }
 	}
 	function oncreate() {
-
 	    setTimeout(() => {
-	        this.set({ref: this.refs.input});
-	    
+	        this.set({ ref: this.refs.input });
+
 	    }, 0);
-
-
-
-	    // console.log('W T F', this.refs);
-	    // if (this.refs.input) {
-	    //     console.log('this.get() :', this.get());
-	    //     console.log('BLAH');
-	    // }
 	}
 	function onstate({ changed, current, previous }) {
-	    if (!this.store && !current.name && !current.belongsTo) return console.warn('No store found.');
-
-	    let { forms } = this.store.get();
-	    const { 
-	        belongsTo, 
+	    const {
+	        belongsTo,
 	        name,
 	        value,
 	        isValid,
@@ -24651,6 +24639,11 @@
 	        handleClear,
 	        handleValidation } = current;
 
+	    if (!this.store) return console.warn('No store found.');
+	    if (!name) return console.warn('No name set.');
+	    if (!belongsTo) return console.warn('No belongsTo set.');
+
+	    let { forms } = this.store.get();
 	    if (!forms) {
 	        forms = createForm(this, {
 	            name: belongsTo,
@@ -24661,7 +24654,6 @@
 	    }
 	    let form = forms[belongsTo];
 	    let element = form.formElements[name];
-	    
 	    if (!element) {
 	        form.formElements[name] = {
 	            belongsTo,
@@ -24675,10 +24667,10 @@
 	            handleValidation
 	        };
 
-	        element = form.formElements[name];        
+	        element = form.formElements[name];
 	    }
 
-	    if (!current.isDirty && changed.value) {
+	    if (previous && !current.isDirty && changed.value) {
 	        form.isDirty = true;
 	        element.isDirty = true;
 	        this.set({ isDirty: true });
@@ -25814,6 +25806,41 @@
 
 	  await wait(0);
 	  t.ok(form.store.get().forms.form1.isValid);
+
+	  form.destroy();
+	});
+
+	test.only('when a FormElements value has changed then isDirty becomes true on local and global store', async (t) => {
+	  const div = document.createElement('div');
+	  document.body.appendChild(div);
+
+	  const store = new Store({});
+
+	  store.set({
+	    form1Data: {
+	      name: 'Rob',
+	      world: ''
+	    }
+	  });
+
+	  const form = new FormElement({
+	    target,
+	    store,
+	    data: {
+	      belongsTo: 'form1',
+	      name: 'name',
+	      value: ''
+	    }
+	  });
+
+	  await wait(0);
+	  t.ok(!form.get().isDirty);
+	  t.ok(!form.store.get().forms.form1.formElements.name.isDirty);
+
+	  form.set({ value: 'mmm' });
+
+	  t.ok(form.get().isDirty);
+	  t.ok(form.store.get().forms.form1.formElements.name.isDirty);
 
 	  form.destroy();
 	});

@@ -41,7 +41,7 @@
                 type: 'text',
                 belongsTo: undefined,
                 name: undefined,
-                value: undefined,
+                value: '',
                 isRequired: false,
                 isValid: undefined,
                 isDirty: false,
@@ -58,11 +58,8 @@
             },
         },
         onstate({ changed, current, previous }) {
-            if (!this.store && !current.name && !current.belongsTo) return console.warn('No store found.');
-
-            let { forms } = this.store.get();
-            const { 
-                belongsTo, 
+            const {
+                belongsTo,
                 name,
                 value,
                 isValid,
@@ -72,6 +69,11 @@
                 handleClear,
                 handleValidation } = current;
 
+            if (!this.store) return console.warn('No store found.');
+            if (!name) return console.warn('No name set.');
+            if (!belongsTo) return console.warn('No belongsTo set.');
+
+            let { forms } = this.store.get();
             if (!forms) {
                 forms = createForm(this, {
                     name: belongsTo,
@@ -83,7 +85,6 @@
 
             let form = forms[belongsTo];
             let element = form.formElements[name];
-            
             if (!element) {
                 form.formElements[name] = {
                     belongsTo,
@@ -97,11 +98,11 @@
                     handleValidation
                 }
 
-                element = form.formElements[name];        
+                element = form.formElements[name];
             };
 
 
-            if (!current.isDirty && changed.value) {
+            if (previous && !current.isDirty && changed.value) {
                 form.isDirty = true;
                 element.isDirty = true;
                 this.set({ isDirty: true });
@@ -109,27 +110,18 @@
 
             element.isValid = isValid;
             form.isValid = checkFormIsValid(form);
-        
+
             this.store.set({
                 forms
             })
         },
-        
+
 
         oncreate() {
-
             setTimeout(() => {
-                this.set({ref: this.refs.input});
-            
+                this.set({ ref: this.refs.input });
+
             }, 0);
-
-
-
-            // console.log('W T F', this.refs);
-            // if (this.refs.input) {
-            //     console.log('this.get() :', this.get());
-            //     console.log('BLAH');
-            // }
         }
     }
 </script>
