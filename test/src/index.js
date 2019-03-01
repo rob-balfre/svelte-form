@@ -2,6 +2,7 @@ import svelte from 'svelte';
 import { Store } from 'svelte/store.js';
 import FormElement from '../../src/FormElement.svelte';
 import Form1 from './examples/Form1.svelte';
+import CustomFormElem from './examples/CustomFormElem.svelte';
 
 import { assert, test, done } from 'tape-modern';
 
@@ -132,7 +133,9 @@ test('when a Form has FormElements and each of them is valid then form.isValid b
   store.set({
     form1Data: {
       name: 'Rob',
-      world: 'test'
+      world: 'test',
+      magic: 't',
+      custom: 'test'
     }
   })
 
@@ -235,12 +238,93 @@ test('when Form reset button is clicked on Form then reset original form state',
   document.querySelector('.resetButton').click();
   t.ok(form.store.get().form1Data.world === 'test');
 
-  // form.destroy();
+  form.destroy();
+});
+
+test('when FormElement has a custom component then component renders', async (t) => {
+  const store = new Store({});
+
+  const form = new FormElement({
+    target,
+    store,
+    data: {
+      belongsTo: 'form1',
+      name: 'name',
+      value: '',
+      component: CustomFormElem,
+      isRequired: true
+    }
+  });
+
+  t.ok(document.querySelector('.customFormElem'));
+
+  form.destroy();
+});
+
+test('when FormElement has a custom component then component and form validates', async (t) => {
+  const store = new Store({});
+
+  store.set({
+    form1Data: {
+      name: '',
+      world: 'test'
+    }
+  })
+
+  const form = new Form1({
+    target,
+    store,
+  });
+
+  t.ok(!form.store.get().forms.form1.isValid);
+
+  store.set({
+    form1Data: {
+      name: 'Rob',
+      world: 'blah',
+      magic: 't',
+      custom: 'blah'
+    }
+  })
+  
+  await wait(0);
+  t.ok(form.store.get().forms.form1.isValid);
+
+  form.destroy();
+});
+
+test('when FormElement has a custom component and form is reset then component value resets', async (t) => {
+  const store = new Store({});
+
+  store.set({
+    form1Data: {
+      custom: 'test',
+    }
+  })
+
+  const form = new Form1({
+    target,
+    store,
+  });
+
+  t.ok(form.store.get().form1Data.custom === 'test');
+
+  store.set({
+    form1Data: {
+      custom: 'blah'
+    }
+  })
+  
+  t.ok(form.store.get().form1Data.custom === 'blah');
+
+
+  document.querySelector('.resetButton').click();
+  t.ok(form.store.get().form1Data.custom === 'test');
+
+  form.destroy();
 });
 
 // TODO: Tests...
-// Reset form data
-
 
 
 

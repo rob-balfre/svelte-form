@@ -13,8 +13,13 @@
     </div>
     <br />
     <div>
-        <label for="world">Magic:</label>
-        <FormElement belongsTo="form1" name="magic" bind:value="$form1Data.magic" isRequired={true}  />
+        <label for="magic">Magic:</label>
+        <FormElement belongsTo="form1" name="magic" bind:value="$form1Data.magic" isRequired={true} />
+    </div>
+    <br />
+    <div>
+        <label for="custom">Custom:</label>
+        <FormElement belongsTo="form1" name="custom" bind:value="$form1Data.custom" isRequired={true} component={CustomFormElem}/>
     </div>
     <br />
 </Form>
@@ -36,6 +41,7 @@
 <script>
     import Form from '../../../src/Form.svelte';
     import FormElement from '../../../src/FormElement.svelte';
+    import CustomFormElem from './CustomFormElem.svelte';
 
     export default {
         components: {
@@ -44,6 +50,7 @@
         },
         data() {
             return {
+                CustomFormElem
             }
         },
         methods: {

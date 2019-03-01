@@ -1,4 +1,4 @@
-{#if type === 'text'}
+{#if type === 'text' && !component}
 <input
     ref:input
     class="{classes}"
@@ -11,6 +11,11 @@
     {name}
     >
 {/if}
+
+{#if component }
+<svelte:component ref:input this="{component}" name="{name}" bind:value />
+{/if}
+
 
 <div>
     <small>isDirty: { isDirty }</small> 
@@ -47,8 +52,13 @@
             }
         },
         computed: {
-            isValid: ({ value, ref }) => {
+            isValid: ({ value, ref, component }) => {
                 if (!value || !ref) return false;
+
+                if (component) {
+                    return !!value
+                }
+
                 return ref.checkValidity()
             },
         },
