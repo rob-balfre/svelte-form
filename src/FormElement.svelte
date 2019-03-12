@@ -13,15 +13,15 @@
 {/if}
 
 {#if component }
-<svelte:component ref:input this="{component}" name="{name}" bind:value />
+<svelte:component ref:input this="{component}" name="{name}" bind:value {...props} />
 {/if}
 
 
-<div>
+<!-- <div>
     <small>isDirty: { isDirty }</small> 
     <br />
     <small>isValid: { isValid }</small>
-</div>
+</div> -->
 
 <style>
     input:valid {
@@ -63,6 +63,8 @@
             },
         },
         onstate({ changed, current, previous }) {
+            if (!previous) return;
+
             const {
                 belongsTo,
                 name,
@@ -77,6 +79,7 @@
 
             let { forms } = this.store.get();
             if (!forms) {
+                console.log('NO FORMS');
                 forms = createForm(this, {
                     name: belongsTo,
                     handleSubmit: (event) => {
@@ -86,6 +89,7 @@
             };
 
             let form = forms[belongsTo];
+            console.log('form :', form);
             let element = form.formElements[name];
 
             if (!element) {

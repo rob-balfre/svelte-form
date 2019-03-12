@@ -24179,7 +24179,7 @@
 		Object.defineProperty(exports, '__esModule', { value: true });
 
 	})));
-	//# sourceMappingURL=svelte.js.map
+
 	});
 
 	unwrapExports(svelte);
@@ -25444,7 +25444,7 @@
 				text16 = createText("\n    ");
 				br3 = createElement("br");
 				form._fragment.c();
-				text17 = createText("\n\n");
+				text17 = createText("\n\n\n\n");
 				if (if_block0) if_block0.c();
 				text18 = createText("\n\n");
 				if (if_block1) if_block1.c();
@@ -25583,7 +25583,7 @@
 		};
 	}
 
-	// (27:0) {#if $form1Data}
+	// (29:0) {#if $form1Data}
 	function create_if_block_1$2(component, ctx) {
 		var h2, text_1, each_anchor;
 
@@ -25657,7 +25657,7 @@
 		};
 	}
 
-	// (29:0) {#each Object.entries($form1Data) as [key, val]}
+	// (31:0) {#each Object.entries($form1Data) as [key, val]}
 	function create_each_block(component, ctx) {
 		var p, text0_value = ctx.key, text0, text1, text2_value = ctx.val, text2;
 
@@ -25694,7 +25694,7 @@
 		};
 	}
 
-	// (34:0) {#if $forms}
+	// (36:0) {#if $forms}
 	function create_if_block$2(component, ctx) {
 		var h2, text1, p0, text2, text3_value = ctx.$forms.form1.isValid, text3, text4, p1, text5, text6_value = ctx.$forms.form1.isDirty, text6, text7, p2, text8, text9_value = ctx.$forms.form1.hasSubmitted, text9;
 
@@ -26032,7 +26032,6 @@
 	        });
 	    });
 	}
-	//# sourceMappingURL=tape-modern.esm.js.map
 
 	// setup
 	const target = document.querySelector('main');
@@ -26348,7 +26347,7 @@
 	  document.querySelector('.resetButton').click();
 	  t.ok(form.store.get().form1Data.custom === 'test');
 
-	  form.destroy();
+	  // form.destroy();
 	});
 
 	// this allows us to close puppeteer once tests have completed

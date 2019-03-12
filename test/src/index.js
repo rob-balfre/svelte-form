@@ -321,7 +321,7 @@ test('when FormElement has a custom component and form is reset then component v
   document.querySelector('.resetButton').click();
   t.ok(form.store.get().form1Data.custom === 'test');
 
-  form.destroy();
+  // form.destroy();
 });
 
 // TODO: Tests...
