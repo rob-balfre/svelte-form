@@ -1,6 +1,5 @@
 {#if type === 'text' && !component}
 <input
-    ref:input
     class="{classes}"
     id={name} 
     bind:value
@@ -12,10 +11,9 @@
     >
 {/if}
 
-{#if component }
-<svelte:component ref:input this="{component}" name="{name}" bind:value {...props} />
+{#if parentForm && component }
+<svelte:component this="{component}" {name} bind:value {...props} {placeholder} {isValid} hasError={parentForm.hasSubmitted && !isValid} />
 {/if}
-
 
 <!-- <div>
     <small>isDirty: { isDirty }</small> 
@@ -39,7 +37,6 @@
     export default {
         data() {
             return {
-                show: false,
                 type: 'text',
                 belongsTo: undefined,
                 name: undefined,
@@ -47,20 +44,22 @@
                 isRequired: false,
                 isValid: undefined,
                 isDirty: false,
-                ref: undefined,
+                isReady: false,
                 originalValue: undefined
             }
         },
         computed: {
-            isValid: ({ value, ref, component }) => {
-                if (!value || !ref) return false;
-
-                if (component) {
-                    return !!value
-                }
-
-                return ref.checkValidity()
+            isValid: ({ value, isRequired }) => {
+                if (!isRequired) return true;
+                if (value === '') return false;
+                if (value === undefined) return false;
+                return true;
             },
+            parentForm: ({$forms, belongsTo}) => {
+                if (!$forms) return;
+
+                return $forms[belongsTo];
+            }
         },
         onstate({ changed, current, previous }) {
             if (!previous) return;
@@ -89,7 +88,6 @@
             };
 
             let form = forms[belongsTo];
-            console.log('form :', form);
             let element = form.formElements[name];
 
             if (!element) {
@@ -127,15 +125,14 @@
 
         oncreate() {
             setTimeout(() => {
-                this.set({ ref: this.refs.input });
+                this.set({ isReady: true });
             }, 0);
-
 
             const listener = this.store.on('state', ({ current, changed }) => {
                 const { name, belongsTo, originalValue } = this.get();
                 const form = current.forms[belongsTo];
 
-                if (form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
+                if (form && form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
                     this.set({ value: JSON.parse(originalValue) });
 
                     form.shouldReset += 1;
