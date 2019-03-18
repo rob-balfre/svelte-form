@@ -12,9 +12,8 @@
 {/if}
 
 {#if parentForm && component }
-<svelte:component this="{component}" {name} bind:value {...props} {placeholder} {isValid} hasError={parentForm.hasSubmitted && !isValid} />
+<svelte:component this="{component}" {name} bind:value {...props} {placeholder} {isValid} {hasError} />
 {/if}
-
 <!-- <div>
     <small>isDirty: { isDirty }</small> 
     <br />
@@ -49,6 +48,11 @@
             }
         },
         computed: {
+            hasError: ({parentForm, isValid}) => {
+                if (!parentForm) return;
+                return parentForm.hasSubmitted && !isValid;
+            },
+
             isValid: ({ value, isRequired }) => {
                 if (!isRequired) return true;
                 if (value === '') return false;
@@ -77,7 +81,7 @@
             if (!belongsTo) return console.warn('No belongsTo set.');
 
             let { forms } = this.store.get();
-            if (!forms) {
+            if (!forms || !forms[belongsTo]) {
                 console.log('NO FORMS');
                 forms = createForm(this, {
                     name: belongsTo,
