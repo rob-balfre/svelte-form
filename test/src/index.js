@@ -203,40 +203,11 @@ test('when a FormElement value has changed then check and set validity (isValid)
   await wait(0);
   t.ok(form.get().isValid)
   t.ok(form.store.get().forms.form1.formElements.name.isValid)
-  form.destroy();
-});
 
-test.only('when Form reset button is clicked on Form then reset original form state', async (t) => {
-  const store = new Store({});
-
-  store.set({
-    form1Data: {
-      name: '',
-      world: 'test'
-    }
-  })
-
-  const form = new Form1({
-    target,
-    store,
-  });
-
-  t.ok(form.store.get().form1Data.world === 'test');
-
-  store.set({
-    form1Data: {
-      name: '',
-      world: 'blah'
-    }
-  })
-  
-  await wait(0);
-  t.ok(form.store.get().form1Data.world === 'blah');
-  document.querySelector('.resetButton').click();
-  t.ok(form.store.get().form1Data.world === 'test');
 
   form.destroy();
 });
+
 
 test('when FormElement has a custom component then component renders', async (t) => {
   const store = new Store({});
@@ -253,6 +224,7 @@ test('when FormElement has a custom component then component renders', async (t)
     }
   });
 
+  await wait(0);
   t.ok(document.querySelector('.customFormElem'));
 
   form.destroy();
@@ -289,39 +261,6 @@ test('when FormElement has a custom component then component and form validates'
 
   form.destroy();
 });
-
-test('when FormElement has a custom component and form is reset then component value resets', async (t) => {
-  const store = new Store({});
-
-  store.set({
-    form1Data: {
-      custom: 'test',
-    }
-  })
-
-  const form = new Form1({
-    target,
-    store,
-  });
-
-  t.ok(form.store.get().form1Data.custom === 'test');
-
-  store.set({
-    form1Data: {
-      custom: 'blah'
-    }
-  })
-  
-  t.ok(form.store.get().form1Data.custom === 'blah');
-
-
-  document.querySelector('.resetButton').click();
-  t.ok(form.store.get().form1Data.custom === 'test');
-
-  // form.destroy();
-});
-
-// TODO: Tests...
 
 
 

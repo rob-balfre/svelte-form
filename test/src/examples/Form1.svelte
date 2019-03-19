@@ -2,19 +2,17 @@
 <Form name="form1" hasSubmitButton={true} hasResetButton={true}>
     <div>
         <label for="Name">Name:</label>
-        <FormElement belongsTo="form1" name="Name" bind:value="$form1Data.name" isRequired={true}
-            pattern="Rob|Tom|Kev" />
+        <FormElement belongsTo="form1" name="Name" bind:value="$form1Data.name" isRequired={true} component={CustomFormElem}/>
     </div>
     <br />
     <div>
         <label for="world">World:</label>
-        <FormElement belongsTo="form1" name="world" bind:value="$form1Data.world" isRequired={true} minlength="3"
-            maxlength="6" />
+        <FormElement belongsTo="form1" name="world" bind:value="$form1Data.world" isRequired={true} component={CustomFormElem}/>
     </div>
     <br />
     <div>
         <label for="magic">Magic:</label>
-        <FormElement belongsTo="form1" name="magic" bind:value="$form1Data.magic" isRequired={true} />
+        <FormElement belongsTo="form1" name="magic" bind:value="$form1Data.magic" isRequired={true} component={CustomFormElem} />
     </div>
     <br />
     <div>
