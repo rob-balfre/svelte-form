@@ -192,25 +192,21 @@ test('when a FormElement value has changed then check and set validity (isValid)
       belongsTo: 'form1',
       name: 'name',
       value: '',
-      pattern: 'Rob|Tom|Kev',
       isRequired: true
     }
   });
 
-
+  await wait(0);
   t.ok(!form.get().isValid)
   t.ok(!form.store.get().forms.form1.formElements.name.isValid)
-
   form.set({ value: 'Rob' });
-
   await wait(0);
   t.ok(form.get().isValid)
   t.ok(form.store.get().forms.form1.formElements.name.isValid)
-
   form.destroy();
 });
 
-test('when Form reset button is clicked on Form then reset original form state', async (t) => {
+test.only('when Form reset button is clicked on Form then reset original form state', async (t) => {
   const store = new Store({});
 
   store.set({
@@ -234,6 +230,7 @@ test('when Form reset button is clicked on Form then reset original form state',
     }
   })
   
+  await wait(0);
   t.ok(form.store.get().form1Data.world === 'blah');
   document.querySelector('.resetButton').click();
   t.ok(form.store.get().form1Data.world === 'test');

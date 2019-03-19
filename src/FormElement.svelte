@@ -1,24 +1,6 @@
-{#if type === 'text' && !component}
-<input
-    class="{classes}"
-    id={name} 
-    bind:value
-    required={isRequired}
-    pattern={pattern || '.*?' }
-    minlength={minlength || 0 }
-    maxlength={maxlength || 9999 }
-    {name}
-    >
-{/if}
-
 {#if parentForm && component }
 <svelte:component this="{component}" {name} bind:value {...props} {placeholder} {isValid} {hasError} />
 {/if}
-<!-- <div>
-    <small>isDirty: { isDirty }</small> 
-    <br />
-    <small>isValid: { isValid }</small>
-</div> -->
 
 <style>
     input:valid {
@@ -36,7 +18,6 @@
     export default {
         data() {
             return {
-                type: 'text',
                 belongsTo: undefined,
                 name: undefined,
                 value: '',
@@ -82,7 +63,6 @@
 
             let { forms } = this.store.get();
             if (!forms || !forms[belongsTo]) {
-                console.log('NO FORMS');
                 forms = createForm(this, {
                     name: belongsTo,
                     handleSubmit: (event) => {
@@ -137,8 +117,7 @@
                 const form = current.forms[belongsTo];
 
                 if (form && form.shouldReset < Object.keys(current.forms[belongsTo].formElements).length) {
-                    this.set({ value: JSON.parse(originalValue) });
-
+                    this.set({ value: typeof originalValue === 'object' ? JSON.parse(originalValue) : originalValue });
                     form.shouldReset += 1;
                     this.store.set({ form })
                 }
